@@ -1,10 +1,10 @@
-# 🚀 Outreach Bot - Production Ready
+#  Outreach Bot - Production Ready
 
 A complete, battle-tested browser automation system built for reliability.
 
 ---
 
-## ✅ Production Features
+## Production Features
 
 | Feature | Status | Description |
 |---------|--------|-------------|
@@ -19,7 +19,7 @@ A complete, battle-tested browser automation system built for reliability.
 
 ---
 
-## 🎯 Quick Start (5 Minutes)
+##  Quick Start 
 
 ### Step 1: Rename & Install
 
@@ -69,13 +69,13 @@ python -m outreach_bot.main --platform instagram
 python tests/test_suite.py
 
 # Expected output:
-# ✅ imports
-# ✅ database
-# ✅ rate_limiter
-# ✅ checkpoint
-# ✅ retry_logic
-# ✅ proxy_manager
-# ✅ selectors
+#  imports
+#  database
+#  rate_limiter
+#  checkpoint
+#  retry_logic
+#  proxy_manager
+#  selectors
 ```
 
 ### Phase 2: Test Browser & Login
@@ -286,7 +286,7 @@ outreach_bot/
 
 ---
 
-## 🛠️ CLI Reference
+##  CLI Reference
 
 ```bash
 # Help
@@ -311,7 +311,7 @@ python -m outreach_bot.main -p instagram --headless
 
 ---
 
-## 🔍 Troubleshooting
+## Troubleshooting
 
 ### "Could not find element: follow_button"
 
@@ -379,7 +379,7 @@ cat debug/error_logs/*.json
 
 ---
 
-## ⚠️ Production Checklist
+## Production Checklist
 
 Before going live:
 
@@ -394,7 +394,7 @@ Before going live:
 
 ---
 
-## 🔐 Safety Tips
+##  Safety Tips
 
 1. **Start with Safe Mode** - Use aggressive only with mature accounts
 2. **Use Proxies** - 1 account per IP maximum
@@ -405,7 +405,7 @@ Before going live:
 
 ---
 
-## 📈 Recommended Workflow
+##  Recommended Workflow
 
 ### Daily Operation
 
@@ -429,7 +429,7 @@ python -m outreach_bot.main --list-sessions
 
 ---
 
-## 🎉 You're Ready!
+##  You're Ready!
 
 The bot is production ready. Follow the checklist above and start with small batches.
 
