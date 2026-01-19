@@ -1,0 +1,20 @@
+# Proxy List
+# Format: host:port or host:port:username:password
+# Lines starting with # are ignored
+
+# Example proxies (replace with real ones):
+# 123.45.67.89:8080
+# proxy.example.com:3128:user:password
+# socks5://192.168.1.1:1080
+
+# Free proxy providers (not recommended for production):
+# - https://www.free-proxy-list.net/
+# - https://www.sslproxies.org/
+
+# Premium proxy providers (recommended):
+# - Bright Data (formerly Luminati)
+# - Oxylabs
+# - Smartproxy
+# - IPRoyal
+
+# Add your proxies below:
