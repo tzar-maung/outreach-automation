@@ -1,23 +1,20 @@
 #  Outreach Bot - Production Ready
 
-A complete, battle-tested browser automation system built for reliability.
+This is a fully built, production-ready browser automation system designed to run reliably at scale.
+It’s been tested in real-world conditions and focuses on stability, recovery and long-term use.
 
----
+Whether you’re running outreach, automation workflows, or repetitive browser tasks, this bot is built to keep going even when things go wrong.
 
-## Production Features
+What it can do
 
-| Feature | Status | Description |
-|---------|--------|-------------|
-| Error Screenshots | ✅ | Auto-capture on failures |
-| CAPTCHA Detection | ✅ | Detect & pause for manual solve |
-| Session Recovery | ✅ | Resume after crash |
-| Robust Selectors | ✅ | Multiple fallbacks per element |
-| Retry Logic | ✅ | Exponential backoff |
-| Rate Limiting | ✅ | Database-backed tracking |
-| Proxy Rotation | ✅ | IP rotation with health checks |
-| Account Protection | ✅ | Warmup, trust score, auto-pause |
-
----
+-Automatically captures screenshots whenever something goes wrong, so debugging is easier
+-Detects CAPTCHAs and pauses execution, allowing you to solve them manually
+-Recovers sessions after crashes or restarts, continuing from where it left off
+-Uses multiple fallback selectors to stay resilient when the UI changes
+-Retries failed actions with smart backoff instead of spamming requests
+-racks activity in a database to stay within safe rate limits
+-Rotates proxies with health checks to avoid bad or blocked IPs
+-Protects accounts using warm-up logic, trust scoring and automatic pausing
 
 ##  Quick Start 
 
@@ -60,7 +57,7 @@ python -m outreach_bot.main --platform instagram
 
 ---
 
-## 📋 Step-by-Step Production Guide
+##  Step-by-Step Production Guide
 
 ### Phase 1: Validate Components
 
@@ -137,7 +134,7 @@ python -m outreach_bot.main --platform instagram --proxy
 
 ---
 
-## 🔧 How Each Feature Works
+##  How Each Feature Works
 
 ### 1. Error Screenshots
 
@@ -229,7 +226,7 @@ Rate limit errors get longer delays (10x).
 | Likes | 40 | 10 |
 | DMs | 10 | 2 |
 
-**Aggressive Mode (⚠️ Risky):**
+**Aggressive Mode (Risky):**
 | Action | Daily | Hourly |
 |--------|-------|--------|
 | Views | 400 | - |
@@ -244,7 +241,7 @@ python -m outreach_bot.main --platform instagram --aggressive
 
 ---
 
-## 📁 Directory Structure
+##  Directory Structure
 
 ```
 outreach_bot/
@@ -351,7 +348,7 @@ mkdir -p debug/screenshots debug/error_logs debug/html
 
 ---
 
-## 📊 Monitoring
+##  Monitoring
 
 ### View Logs
 
@@ -385,7 +382,7 @@ Before going live:
 
 - [ ] `python tests/test_suite.py` passes
 - [ ] `python -m outreach_bot.main --test` passes
-- [ ] `python -m outreach_bot.main --test-selectors` shows all ✅
+- [ ] `python -m outreach_bot.main --test-selectors` shows all 
 - [ ] Logged into Instagram/TikTok (manual)
 - [ ] `data/targets.csv` configured
 - [ ] `data/proxies.txt` configured (if using proxies)
