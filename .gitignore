@@ -1,0 +1,34 @@
+# Secrets and local environment settings
+.env
+.env.*
+!.env.example
+
+# Python-generated files and local environments
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+venv/
+
+# Local application data
+*.db
+*.sqlite
+*.sqlite3
+data/targets.csv
+data/proxies.txt
+data/results*.csv
+
+# Browser sessions and generated proxy extensions
+chrome_profile/
+proxy_auth_extension/
+
+# Runtime output
+logs/
+debug/
+checkpoints/
+
+# Editor and operating-system files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
