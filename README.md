@@ -1,433 +1,180 @@
-#  Outreach Bot - Production Ready
+# Outreach Assistant
 
-This is a fully built, production-ready browser automation system designed to run reliably at scale.
-It’s been tested in real-world conditions and focuses on stability, recovery and long-term use.
+Outreach Assistant is a Python learning and portfolio project for organizing responsible, human-reviewed outreach.
 
-Whether you’re running outreach, automation workflows, or repetitive browser tasks, this bot is built to keep going even when things go wrong.
+The repository began as an experimental Selenium automation system for Instagram and TikTok. It is now being redesigned into a local outreach assistant that helps a person manage contacts, prepare personalized drafts, record outcomes, and remember follow-ups. It is not intended for bulk messaging, unsolicited spam, private-data scraping, or unattended sending.
 
-What it can do
+## Project status
 
--Automatically captures screenshots whenever something goes wrong, so debugging is easier
--Detects CAPTCHAs and pauses execution, allowing you to solve them manually
--Recovers sessions after crashes or restarts, continuing from where it left off
--Uses multiple fallback selectors to stay resilient when the UI changes
--Retries failed actions with smart backoff instead of spamming requests
--racks activity in a database to stay within safe rate limits
--Rotates proxies with health checks to avoid bad or blocked IPs
--Protects accounts using warm-up logic, trust scoring and automatic pausing
+**Redesign in progress.**
 
-##  Quick Start 
+The repository currently contains working component-level code from the original browser-automation prototype, including SQLite storage, rate limiting, retry logic, session checkpoints, platform adapters, selectors, and message templates. The component test suite passes in the expected package layout, but the live browser workflow has not been revalidated as a safe production application.
 
-### Step 1: Rename & Install
+The next version will prioritize a clear contact-management and draft-review workflow over automatic platform actions. Later milestones may automate approved workflow steps through supported integrations while preserving the human approval boundary.
 
-```bash
-# Rename folder
-mv outreach_bot_production outreach_bot
+## Responsible-use principles
 
-# Install dependencies
-pip install selenium webdriver-manager requests
+- A person must review and approve every message before it is sent.
+- The application will not send a message without explicit human approval.
+- The application will not scrape private or restricted data.
+- Contacts should be added only from legitimate, permission-based sources.
+- API keys, passwords, browser sessions, customer data, and proxy credentials must never be committed to Git.
+- Local databases, logs, screenshots, checkpoints, and working CSV files are excluded through `.gitignore`.
+
+## Planned workflow
+
+```text
+Add or import an appropriate contact
+              |
+              v
+Prepare a personalized draft
+              |
+              v
+Human reviews and edits the message
+              |
+              v
+Human explicitly approves the message
+              |
+              v
+Send manually or through an authorized integration
+              |
+              v
+Record delivery, notes, reply, and follow-up date
 ```
 
-### Step 2: Run Tests
+## Portfolio MVP
 
-```bash
-# Run component tests (no browser)
-python tests/test_suite.py
+The first portfolio-ready version will provide:
 
-# Run full test with browser
-python -m outreach_bot.main --test
-```
+- Contact creation and editing
+- Statuses such as `Not contacted`, `Drafted`, `Sent`, and `Replied`
+- Personalized message drafts
+- Mandatory human review and approval before sending
+- Notes and activity history
+- Follow-up reminders
+- CSV import and export
+- Local SQLite storage
+- Automated tests for core workflows
 
-### Step 3: Test Selectors (Important!)
+## Existing technical components
 
-```bash
-# Test Instagram selectors
-python -m outreach_bot.main --test-selectors
+| Area | Location | Purpose |
+| --- | --- | --- |
+| Command-line coordination | `main.py` | Parses options and coordinates the original workflows |
+| Configuration | `config.py` | Defines local paths, limits, and platform settings |
+| SQLite storage | `core/database.py` | Stores targets and action history |
+| Message templates | `core/message_templates.py` | Builds and validates draft text |
+| Checkpoints | `core/checkpoint.py` | Saves progress for recovery after interruption |
+| Retry handling | `core/retry_logic.py` | Retries selected failures with backoff |
+| Rate limiting | `core/rate_limiter.py` | Tracks and limits actions |
+| Browser prototype | `core/browser.py` | Configures Selenium and Chrome |
+| Platform adapters | `core/platform/` | Contains the original platform-specific behavior |
+| Component tests | `tests/test_suite.py` | Exercises core modules without starting a browser |
 
-# Test TikTok selectors  
-python -m outreach_bot.main --test-selectors --platform tiktok
-```
+Some original modules can be reused after review. Modules that automatically discover targets, simulate human behavior, or perform direct platform actions are considered legacy prototype code during the redesign.
 
-### Step 4: First Run
+## Repository layout
 
-```bash
-# Run on Instagram
-python -m outreach_bot.main --platform instagram
-```
-
----
-
-##  Step-by-Step Production Guide
-
-### Phase 1: Validate Components
-
-```bash
-# 1. Run unit tests
-python tests/test_suite.py
-
-# Expected output:
-#  imports
-#  database
-#  rate_limiter
-#  checkpoint
-#  retry_logic
-#  proxy_manager
-#  selectors
-```
-
-### Phase 2: Test Browser & Login
-
-```bash
-# 2. Run browser test
-python -m outreach_bot.main --test
-
-# This will:
-# - Start Chrome
-# - Test all components
-# - Check if logged into Instagram
-# - Take test screenshots
-```
-
-### Phase 3: Validate Selectors
-
-```bash
-# 3. Test selectors on real pages
-python -m outreach_bot.main --test-selectors
-
-# This will:
-# - Navigate to Instagram
-# - Test each selector
-# - Report which ones work/broken
-```
-
-**If selectors are broken:**
-1. Open `core/selectors.py`
-2. Find the broken selector
-3. Use browser DevTools to find new selector
-4. Update primary or add fallback
-
-### Phase 4: Configure Targets
-
-Edit `data/targets.csv`:
-```csv
-url,platform,username,notes
-https://www.instagram.com/user1,instagram,user1,Test
-https://www.instagram.com/user2,instagram,user2,Test
-```
-
-### Phase 5: Test Run (Small Batch)
-
-```bash
-# 4. Run with limited targets
-python -m outreach_bot.main --platform instagram --max-targets 5
-```
-
-### Phase 6: Production Run
-
-```bash
-# 5. Full run
-python -m outreach_bot.main --platform instagram
-
-# With proxy (recommended)
-python -m outreach_bot.main --platform instagram --proxy
-```
-
----
-
-##  How Each Feature Works
-
-### 1. Error Screenshots
-
-**Location:** `debug/screenshots/`, `debug/error_logs/`
-
-When an error occurs:
-1. Screenshot is saved automatically
-2. Page HTML is saved
-3. Error details logged to JSON
-
-```bash
-# View debug files
-ls debug/screenshots/
-ls debug/error_logs/
-```
-
-### 2. CAPTCHA Detection
-
-The bot automatically detects:
-- reCAPTCHA
-- hCaptcha
-- Instagram "Action Blocked"
-- Instagram "Verify Identity"
-- TikTok slider captcha
-
-When detected:
-1. Screenshot is taken
-2. Alert beep sounds
-3. Bot pauses for manual solve
-4. Press ENTER when done
-
-### 3. Session Recovery
-
-Progress is saved automatically. If the bot crashes:
-
-```bash
-# List available sessions
-python -m outreach_bot.main --list-sessions
-
-# Resume last session
-python -m outreach_bot.main --resume
-
-# Resume specific session
-python -m outreach_bot.main --resume session_20250117_143022
-```
-
-**Checkpoint files:** `checkpoints/*.json`
-
-### 4. Robust Selectors
-
-Each element has multiple selectors:
-
-```python
-"follow_button": Selector(
-    primary="//header//button[.//div[contains(text(),'Follow')]]",
-    fallbacks=[
-        "//button[.//text()='Follow']",
-        "header button:not([class*='following'])",
-    ],
-)
-```
-
-**To update broken selectors:**
-1. Open Instagram in Chrome
-2. Right-click element → Inspect
-3. Copy selector or XPath
-4. Update `core/selectors.py`
-
-### 5. Retry Logic
-
-Automatic retry with exponential backoff:
-
-| Attempt | Delay |
-|---------|-------|
-| 1 | Immediate |
-| 2 | 2 seconds |
-| 3 | 4 seconds |
-| 4 | 8 seconds |
-
-Rate limit errors get longer delays (10x).
-
-### 6. Rate Limiting
-
-**Default limits (Safe Mode):**
-| Action | Daily | Hourly |
-|--------|-------|--------|
-| Views | 150 | - |
-| Follows | 15 | 3 |
-| Likes | 40 | 10 |
-| DMs | 10 | 2 |
-
-**Aggressive Mode (Risky):**
-| Action | Daily | Hourly |
-|--------|-------|--------|
-| Views | 400 | - |
-| Follows | 40 | 8 |
-| Likes | 100 | 20 |
-| DMs | 50 | 5 |
-
-```bash
-# Enable aggressive mode
-python -m outreach_bot.main --platform instagram --aggressive
-```
-
----
-
-##  Directory Structure
-
-```
+```text
 outreach_bot/
-├── main.py                    # CLI entry point
-├── config.py                  # All configuration
-│
-├── core/
-│   ├── browser.py             # Chrome setup
-│   ├── database.py            # SQLite storage
-│   ├── rate_limiter.py        # Action limits
-│   ├── account_protector.py   # Ban protection
-│   │
-│   ├── debug_helper.py        # Screenshots & logging
-│   ├── captcha_handler.py     # CAPTCHA detection
-│   ├── checkpoint.py          # Session recovery
-│   ├── retry_logic.py         # Retry with backoff
-│   ├── selectors.py           # CSS/XPath selectors
-│   │
-│   ├── proxy_manager.py       # IP rotation
-│   ├── scheduler.py           # Timed execution
-│   ├── human_behavior.py      # Anti-detection
-│   │
-│   └── platform/
-│       ├── instagram.py       # Instagram adapter
-│       └── tiktok.py          # TikTok adapter
-│
-├── tests/
-│   └── test_suite.py          # Unit tests
-│
-├── data/
-│   ├── targets.csv            # Target URLs
-│   └── proxies.txt            # Proxy list
-│
-├── checkpoints/               # Session recovery
-├── debug/                     # Screenshots & logs
-├── logs/                      # Application logs
-└── chrome_profile/            # Persistent login
+|-- main.py
+|-- config.py
+|-- core/
+|-- data/
+|   |-- targets.example.csv
+|   `-- proxies.example.txt
+|-- docs/
+|-- tests/
+`-- README.md
 ```
 
----
+Working data files are intentionally not tracked. Copy an example file when local test data is needed, and never place private contact information in a commit.
 
-##  CLI Reference
+## Local setup
 
-```bash
-# Help
-python -m outreach_bot.main --help
+The current imports expect the cloned directory to be named `outreach_bot`. This packaging limitation is recorded honestly and will be corrected during the redesign.
 
-# Tests
-python -m outreach_bot.main --test              # Component test
-python -m outreach_bot.main --test-selectors    # Selector test
+### Windows PowerShell
 
-# Sessions
-python -m outreach_bot.main --list-sessions     # List sessions
-python -m outreach_bot.main --resume            # Resume session
+```powershell
+git clone https://github.com/tzar-maung/outreach-automation.git outreach_bot
+cd outreach_bot
 
-# Run
-python -m outreach_bot.main --platform instagram
-python -m outreach_bot.main --platform tiktok
-python -m outreach_bot.main -p instagram --proxy
-python -m outreach_bot.main -p instagram --aggressive
-python -m outreach_bot.main -p instagram --max-targets 20
-python -m outreach_bot.main -p instagram --headless
+py -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install --upgrade pip
+python -m pip install selenium webdriver-manager requests
 ```
 
----
+The project does not yet have a locked dependency file. Adding one is part of the roadmap.
 
-## Troubleshooting
+## Run the component tests
 
-### "Could not find element: follow_button"
+From inside the `outreach_bot` directory in Windows PowerShell:
 
-Selectors need updating:
-```bash
-python -m outreach_bot.main --test-selectors
-```
-Then update `core/selectors.py`.
-
-### "Not logged in"
-
-1. Run without headless mode
-2. Log in manually in browser
-3. Press ENTER
-4. Session saved for future runs
-
-### "Action Blocked"
-
-Instagram rate limited you:
-1. Bot auto-pauses
-2. Wait 24-48 hours
-3. Reduce limits in `config.py`
-
-### Browser crashes
-
-Session auto-saved:
-```bash
-python -m outreach_bot.main --resume
+```powershell
+$env:PYTHONUTF8 = "1"
+$env:PYTHONPATH = Split-Path -Parent (Get-Location)
+python tests\test_suite.py
 ```
 
-### Screenshots not saving
+These tests use temporary files and do not start a browser. Browser-based commands are intentionally omitted from this README while the human-review redesign is incomplete.
 
-Check debug directory exists:
-```bash
-mkdir -p debug/screenshots debug/error_logs debug/html
-```
+## Roadmap
 
----
+### Milestone 1: Safety and documentation
 
-##  Monitoring
+- [x] Protect local and sensitive files with `.gitignore`
+- [x] Replace tracked working data with example files
+- [ ] Document the architecture and current limitations
+- [ ] Add a reproducible dependency file
+- [ ] Correct the Python package layout
 
-### View Logs
+### Milestone 2: Contact management
 
-```bash
-# Real-time logs
-tail -f logs/outreach_bot_*.log
-```
+- [ ] Define the contact and activity data model
+- [ ] Add contact creation, editing, search, and status tracking
+- [ ] Add notes and follow-up dates
+- [ ] Add safe CSV import and export
 
-### View Progress
+### Milestone 3: Human-reviewed drafts
 
-```bash
-# List sessions
-python -m outreach_bot.main --list-sessions
-```
+- [ ] Create personalized message drafts
+- [ ] Add an edit and approval step
+- [ ] Prevent unattended sending
+- [ ] Record sending and replies in activity history
 
-### View Debug Files
+### Milestone 4: Approved workflow automation
 
-```bash
-# Screenshots
-ls -la debug/screenshots/
+- [ ] Evaluate supported, authorized sending integrations
+- [ ] Require explicit approval before every send action
+- [ ] Add consent, opt-out, rate-limit, and audit controls
+- [ ] Test the complete approved-send workflow safely
 
-# Error reports
-cat debug/error_logs/*.json
-```
+### Milestone 5: Portfolio and production quality
 
----
+- [ ] Add focused automated tests
+- [ ] Improve error handling and validation
+- [ ] Add screenshots and a short demonstration
+- [ ] Document design decisions and privacy safeguards
 
-## Production Checklist
+## Security and privacy
 
-Before going live:
+Never commit:
 
-- [ ] `python tests/test_suite.py` passes
-- [ ] `python -m outreach_bot.main --test` passes
-- [ ] `python -m outreach_bot.main --test-selectors` shows all 
-- [ ] Logged into Instagram/TikTok (manual)
-- [ ] `data/targets.csv` configured
-- [ ] `data/proxies.txt` configured (if using proxies)
-- [ ] Tested with `--max-targets 5` first
-- [ ] Using SAFE mode (not aggressive) initially
+- `.env` files or credentials
+- Real contact or customer information
+- Browser profiles or login sessions
+- SQLite databases
+- Proxy credentials
+- Logs, screenshots, or saved page content
 
----
+If a secret is accidentally committed, removing it in a later commit is not sufficient because Git retains history. Revoke the secret immediately and clean the repository history before making the repository public again.
 
-##  Safety Tips
+## AI-assisted development
 
-1. **Start with Safe Mode** - Use aggressive only with mature accounts
-2. **Use Proxies** - 1 account per IP maximum
-3. **Test First** - Always run `--test-selectors` before full runs
-4. **Monitor Warnings** - Stop immediately if you see "Action Blocked"
-5. **Backup Sessions** - Checkpoints in `checkpoints/` folder
-6. **Check Screenshots** - Debug issues with `debug/screenshots/`
+This project was conceived and directed by the repository owner with assistance from AI coding tools. The redesign emphasizes understanding the architecture, reviewing each change, testing behavior, and documenting technical decisions rather than treating generated code as automatically correct.
 
----
+## License
 
-##  Recommended Workflow
-
-### Daily Operation
-
-```bash
-# Morning: Check selector health
-python -m outreach_bot.main --test-selectors
-
-# If all green: Run bot
-python -m outreach_bot.main --platform instagram
-
-# Evening: Check progress
-python -m outreach_bot.main --list-sessions
-```
-
-### Weekly Maintenance
-
-1. Update selectors if Instagram changed
-2. Review error screenshots
-3. Clean old checkpoints
-4. Update target list
-
----
-
-##  You're Ready!
-
-The bot is production ready. Follow the checklist above and start with small batches.
-
-Good luck! 🚀
+No license has been selected yet. Until a license is added, the repository remains publicly viewable but does not grant general permission to copy, modify, or redistribute the code.
