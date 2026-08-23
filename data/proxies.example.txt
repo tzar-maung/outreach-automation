@@ -1,0 +1,2 @@
+# Optional example only. Do not commit real proxy credentials.
+# host:port:username:password
