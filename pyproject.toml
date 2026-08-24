@@ -1,0 +1,27 @@
+[build-system]
+requires = ["setuptools>=69"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "outreach-assistant"
+version = "0.1.0"
+description = "A responsible, human-reviewed outreach workflow assistant"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "requests>=2.31,<3",
+    "selenium>=4.18,<5",
+    "webdriver-manager>=4,<5",
+]
+
+[tool.setuptools]
+packages = [
+    "outreach_bot",
+    "outreach_bot.core",
+    "outreach_bot.core.platform",
+]
+
+[tool.setuptools.package-dir]
+outreach_bot = "."
+"outreach_bot.core" = "core"
+"outreach_bot.core.platform" = "core/platform"
