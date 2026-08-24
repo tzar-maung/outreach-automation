@@ -202,6 +202,7 @@ def test_checkpoint():
     import shutil
     
     temp_dir = tempfile.mkdtemp()
+    checkpoint = None
     
     try:
         checkpoint = CheckpointManager(
@@ -245,6 +246,8 @@ def test_checkpoint():
         return False
         
     finally:
+        if checkpoint is not None:
+            checkpoint.close(save=False)
         shutil.rmtree(temp_dir, ignore_errors=True)
 
 
