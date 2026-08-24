@@ -328,8 +328,8 @@ class CheckpointManager:
     # Persistence
     # --------------------------------------------------
     
-    def save(self):
-        """Save checkpoint to file."""
+    def save(self) -> bool:
+        """Save checkpoint to file and report whether it succeeded."""
         self._update_timestamp()
         
         try:
@@ -337,9 +337,11 @@ class CheckpointManager:
             
             with open(self.checkpoint_file, "w") as f:
                 json.dump(data, f, indent=2, default=str)
-            
+            return True
+
         except Exception as e:
             print(f"⚠️ Failed to save checkpoint: {e}")
+            return False
     
     def _update_timestamp(self):
         """Update the last modified timestamp."""
@@ -381,16 +383,30 @@ class CheckpointManager:
         print("\n⚠️ Shutdown signal received...")
         self._on_shutdown()
         raise KeyboardInterrupt()
-    
-    def _on_shutdown(self):
-        """Handle shutdown - save final state."""
+
+    def close(self, save: bool = True) -> bool:
+        """Stop background work and unregister the exit-time save handler."""
         self._stop_auto_save.set()
-        
+
+        if self._auto_save_thread and self._auto_save_thread.is_alive():
+            self._auto_save_thread.join(timeout=1)
+
+        atexit.unregister(self._on_shutdown)
+
+        if not save:
+            return True
+
         if self.state.status == "running":
             self.state.status = "interrupted"
-        
-        self.save()
-        print(f"✅ Session saved: {self.checkpoint_file}")
+
+        saved = self.save()
+        if saved:
+            print(f"✅ Session saved: {self.checkpoint_file}")
+        return saved
+
+    def _on_shutdown(self):
+        """Handle shutdown - save final state."""
+        self.close(save=True)
     
     # --------------------------------------------------
     # Progress Information
