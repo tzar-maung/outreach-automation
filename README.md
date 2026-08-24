@@ -92,29 +92,27 @@ Working data files are intentionally not tracked. Copy an example file when loca
 
 ## Local setup
 
-The current imports expect the cloned directory to be named `outreach_bot`. This packaging limitation is recorded honestly and will be corrected during the redesign.
+The project includes `pyproject.toml`, so it can be installed from a normally named clone such as `outreach-automation`. Editable installation connects the local source directory to Python without copying contact data or other ignored runtime files.
 
 ### Windows PowerShell
 
 ```powershell
-git clone https://github.com/tzar-maung/outreach-automation.git outreach_bot
-cd outreach_bot
+git clone https://github.com/tzar-maung/outreach-automation.git
+cd outreach-automation
 
 py -m venv .venv
 .\.venv\Scripts\Activate.ps1
-python -m pip install --upgrade pip
-python -m pip install selenium webdriver-manager requests
+python -m pip install -e .
 ```
 
-The project does not yet have a locked dependency file. Adding one is part of the roadmap.
+The direct dependencies and supported Python version are declared in `pyproject.toml`. The project does not yet provide a fully locked dependency set for byte-for-byte reproducible environments.
 
 ## Run the component tests
 
-From inside the `outreach_bot` directory in Windows PowerShell:
+From inside the repository directory in Windows PowerShell:
 
 ```powershell
 $env:PYTHONUTF8 = "1"
-$env:PYTHONPATH = Split-Path -Parent (Get-Location)
 python tests\test_suite.py
 ```
 
@@ -127,8 +125,8 @@ These tests use temporary files and do not start a browser. Browser-based comman
 - [x] Protect local and sensitive files with `.gitignore`
 - [x] Replace tracked working data with example files
 - [ ] Document the architecture and current limitations
-- [ ] Add a reproducible dependency file
-- [ ] Correct the Python package layout
+- [x] Add installable project and dependency metadata
+- [x] Correct package imports for normally named clones
 
 ### Milestone 2: Contact management
 
