@@ -2,6 +2,7 @@
 Database Storage - SQLite Backend for Persistent Data
 
 Stores:
+- Contacts and their outreach status
 - Targets and their status
 - Action history (follows, likes, views)
 - Rate limit tracking
@@ -18,6 +19,9 @@ from pathlib import Path
 from typing import Optional, List, Dict, Any
 from contextlib import contextmanager
 from dataclasses import dataclass
+
+
+CONTACT_STATUSES = ("Not contacted", "Drafted", "Sent", "Replied")
 
 
 @dataclass
@@ -55,6 +59,7 @@ class Database:
     SQLite database for outreach bot data.
     
     Tables:
+    - contacts: People and organizations in the human-reviewed workflow
     - targets: Profile URLs to process
     - action_logs: History of all actions taken
     - rate_limits: Daily/hourly action counters
@@ -91,6 +96,20 @@ class Database:
         with self.get_connection() as conn:
             cursor = conn.cursor()
             
+            # Contact storage is separate from the legacy automation targets.
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS contacts (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    name TEXT NOT NULL CHECK(length(trim(name)) > 0),
+                    organization TEXT,
+                    profile_url TEXT,
+                    status TEXT NOT NULL DEFAULT 'Not contacted'
+                        CHECK(status IN ('Not contacted', 'Drafted', 'Sent', 'Replied')),
+                    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+                )
+            """)
+
             # Targets table
             cursor.execute("""
                 CREATE TABLE IF NOT EXISTS targets (
@@ -171,6 +190,63 @@ class Database:
                 ON action_logs(username, platform)
             """)
     
+    # --------------------------------------------------
+    # Contact Management (storage only; no browser or sending actions)
+    # --------------------------------------------------
+
+    def add_contact(self, name: str, organization: Optional[str] = None,
+                    profile_url: Optional[str] = None) -> int:
+        """Save a contact as Not contacted and return its ID.
+
+        Names must contain non-whitespace text. Organization and profile URL
+        are optional text fields; URLs are stored but never visited here.
+        """
+        if not isinstance(name, str) or not name.strip():
+            raise ValueError("Contact name must be non-empty text.")
+
+        for field_name, value in (("organization", organization),
+                                  ("profile_url", profile_url)):
+            if value is not None and not isinstance(value, str):
+                raise ValueError(f"{field_name} must be text or None.")
+
+        with self.get_connection() as conn:
+            cursor = conn.execute("""
+                INSERT INTO contacts (name, organization, profile_url)
+                VALUES (?, ?, ?)
+            """, (name.strip(), organization, profile_url))
+            return cursor.lastrowid
+
+    def list_contacts(self) -> List[Dict[str, Any]]:
+        """Return saved contacts in creation order (ascending ID)."""
+        with self.get_connection() as conn:
+            rows = conn.execute("""
+                SELECT id, name, organization, profile_url, status,
+                       created_at, updated_at
+                FROM contacts
+                ORDER BY id
+            """).fetchall()
+            return [dict(row) for row in rows]
+
+    def update_contact_status(self, contact_id: int, status: str) -> bool:
+        """Record a status without performing outreach.
+
+        Return False if the contact does not exist. Invalid IDs or statuses
+        raise ValueError. Marking a contact Sent does not send a message.
+        """
+        if (not isinstance(contact_id, int) or isinstance(contact_id, bool)
+                or contact_id <= 0):
+            raise ValueError("Contact ID must be a positive integer.")
+        if status not in CONTACT_STATUSES:
+            raise ValueError(f"Status must be one of: {', '.join(CONTACT_STATUSES)}.")
+
+        with self.get_connection() as conn:
+            cursor = conn.execute("""
+                UPDATE contacts
+                SET status = ?, updated_at = CURRENT_TIMESTAMP
+                WHERE id = ?
+            """, (status, contact_id))
+            return cursor.rowcount > 0
+
     # --------------------------------------------------
     # Target Management
     # --------------------------------------------------
